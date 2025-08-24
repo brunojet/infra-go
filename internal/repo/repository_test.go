@@ -119,11 +119,11 @@ func TestListAndFindWithParams(t *testing.T) {
 		t.Fatalf("expected 15 items got %d", len(all))
 	}
 
-	// FindWithParams should return total 15 and limited results
+	// ListWithParams should return total 15 and limited results
 	params := &ListParams{Limit: 5, Offset: 2}
-	items, total, err := r.FindWithParams(ctx, params, nil)
+	items, total, err := r.ListWithParams(ctx, params, nil)
 	if err != nil {
-		t.Fatalf("FindWithParams failed: %v", err)
+		t.Fatalf("ListWithParams failed: %v", err)
 	}
 	if total != 15 {
 		t.Fatalf("expected total 15 got %d", total)

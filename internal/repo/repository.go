@@ -91,10 +91,6 @@ func (r *Repository[T]) ListWithParams(ctx context.Context, p *ListParams, mod f
 	return out, total, err
 }
 
-func (r *Repository[T]) FindWithParams(ctx context.Context, p *ListParams, mod func(*gorm.DB) *gorm.DB) ([]T, int64, error) {
-	return r.ListWithParams(ctx, p, mod)
-}
-
 func (r *Repository[T]) WithTx(ctx context.Context, fn func(txRepo *Repository[T]) error) error {
 	return r.withDB(ctx).Transaction(func(tx *gorm.DB) error {
 		return fn(NewRepository[T](tx))

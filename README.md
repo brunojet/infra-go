@@ -22,6 +22,29 @@ repo := repo.NewRepository[MeuTipo](db)
 err := repo.Create(ctx, &obj)
 ```
 
+## Exemplo completo
+```go
+import (
+    "context"
+    "github.com/brunojet/infra-go/pkg/repo"
+    "gorm.io/driver/sqlite"
+    "gorm.io/gorm"
+)
+
+type MeuTipo struct {
+    ID   int64
+    Nome string
+}
+
+func main() {
+    db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+    r := repo.NewRepository[MeuTipo](db)
+    ctx := context.Background()
+    obj := MeuTipo{Nome: "Exemplo"}
+    _ = r.Create(ctx, &obj)
+}
+```
+
 ## Transações
 ```go
 repo.WithTx(ctx, func(txRepo repo.Repository[MeuTipo]) error {
@@ -38,6 +61,22 @@ repo.WithTx(ctx, func(txRepo repo.Repository[MeuTipo]) error {
 - Sempre use as interfaces públicas para desacoplamento
 - Trate erros de forma padronizada
 - Consulte o README dos domínios para detalhes das entidades
+
+## Testes de integração
+Todos os métodos principais (Create, Get, Update, Delete, List) possuem exemplos de teste usando banco em memória:
+```go
+func TestRepository_CreateAndGet(t *testing.T) {
+    db := setupDB(t)
+    r := repo.NewRepository[MeuTipo](db)
+    ctx := context.Background()
+    obj := MeuTipo{Nome: "Teste"}
+    err := r.Create(ctx, &obj)
+    require.NoError(t, err)
+    got, err := r.GetByID(ctx, obj.ID)
+    require.NoError(t, err)
+    require.Equal(t, obj.Nome, got.Nome)
+}
+```
 
 ---
 

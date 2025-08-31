@@ -15,9 +15,9 @@ type BaseModel struct {
 
 type BaseEntity struct {
 	BaseModel
-	Nome      string `gorm:"not null" json:"nome"` // Obrigatório
+	Nome      string `gorm:"not null;index" json:"nome"` // Obrigatório, index genérico para compatibilidade
 	Descricao string `json:"descricao"`
-	Ativo     bool   `json:"ativo"`
+	Ativo     bool   `gorm:"index;default:false" json:"ativo"`
 }
 
 func (e *BaseEntity) BeforeCreate(tx *gorm.DB) (err error) {
@@ -31,7 +31,7 @@ type Anexo struct {
 	BaseModel
 	Nome          string `gorm:"size:128;not null" json:"nome"`
 	TipoMime      string `gorm:"size:64;not null" json:"tipo_mime"`
-	MD5           string `gorm:"size:32;not null" json:"md5"`
+	SHA256        string `gorm:"size:64;not null" json:"sha256"`
 	Tamanho       int64  `gorm:"not null" json:"tamanho"`
 	Armazenamento string `gorm:"size:256;not null" json:"armazenamento"`
 	Caminho       string `gorm:"size:256;not null" json:"caminho"`

@@ -18,7 +18,7 @@ const (
 type StorageObject struct {
 	BaseModel
 	Path     string        `gorm:"uniqueIndex;not null;type:char(40)" json:"path"`
-	Name     string        `gorm:"not null;type:char(40)" json:"name"`
+	Name     string        `gorm:"not null;type:varchar(40)" json:"name"`
 	MimeType string        `gorm:"not null;type:varchar(100)" json:"mime_type"`
 	Status   *ObjectStatus `gorm:"index;not null;default:0;constraint:check(status IN (0, 10, 20, 30))" json:"status"`
 }

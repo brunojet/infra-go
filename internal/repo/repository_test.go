@@ -422,14 +422,14 @@ func setupDB(t *testing.T) *gorm.DB {
 		t.Fatalf("failed to enable foreign keys: %v", err)
 	}
 	// migrate only test domain tables used here
-	if err := db.AutoMigrate(&AnexoTest{}, &ImagemTest{}, &VersaoAplicativoTest{}); err != nil {
+	if err := db.AutoMigrate(&StorageObjectTest{}, &ImagemTest{}, &VersaoAplicativoTest{}); err != nil {
 		t.Fatalf("migrate failed: %v", err)
 	}
 	return db
 }
 
 // --- lightweight local test-domain types ---
-type AnexoTest struct {
+type StorageObjectTest struct {
 	ID            int64  `gorm:"primaryKey;autoIncrement"`
 	Nome          string `gorm:"size:128;not null"`
 	TipoMime      string `gorm:"size:64;not null"`
@@ -440,11 +440,11 @@ type AnexoTest struct {
 	Presente      bool   `gorm:"default:false"`
 }
 
-func (AnexoTest) TableName() string { return "anexo" }
+func (StorageObjectTest) TableName() string { return "anexo" }
 
 type ImagemTest struct {
-	ID    int64     `gorm:"primaryKey;autoIncrement:false"`
-	Anexo AnexoTest `gorm:"foreignKey:ID;references:ID;constraint:OnDelete:RESTRICT;belongsTo"`
+	ID            int64             `gorm:"primaryKey;autoIncrement:false"`
+	StorageObject StorageObjectTest `gorm:"foreignKey:ID;references:ID;constraint:OnDelete:RESTRICT;belongsTo"`
 }
 
 func (ImagemTest) TableName() string { return "imagem" }
@@ -462,9 +462,9 @@ func TestListWithParams_PaginationAndMod(t *testing.T) {
 	ctx := context.Background()
 	db := setupDB(t)
 
-	// create 5 anexo+imagem pairs because Imagem.ID is FK -> Anexo.ID
+	// create 5 anexo+imagem pairs because Imagem.ID is FK -> StorageObject.ID
 	for i := int64(1); i <= 5; i++ {
-		an := &AnexoTest{
+		an := &StorageObjectTest{
 			ID:            i,
 			Nome:          fmt.Sprintf("anexo-%d", i),
 			TipoMime:      "image/png",

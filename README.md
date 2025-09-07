@@ -3,7 +3,7 @@
 Este módulo provê abstrações de persistência para o projeto, usando GORM e interfaces para repositórios genéricos e específicos.
 
 ## Principais recursos
-- Repositórios genéricos (`Repository[T]`) e específicos (ex: `AnexoRepo`)
+- Repositórios genéricos (`Repository[T]`) e específicos (ex: `StorageObjectRepo`)
 - Interfaces públicas para fácil integração e testes
 - Suporte a transações e métodos CRUD
 

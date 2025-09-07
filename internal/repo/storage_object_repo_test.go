@@ -28,37 +28,18 @@ func withTestDB(t *testing.T) *gorm.DB {
 		t.Fatalf("failed enable fk: %v", err)
 	}
 	// imagem is an application-level entity; use local imagemModel for migration
-	if err := db.AutoMigrate(&domain.Anexo{}, &imagemModel{}); err != nil {
+	if err := db.AutoMigrate(&domain.StorageObject{}, &imagemModel{}); err != nil {
 		t.Fatalf("auto migrate failed: %v", err)
 	}
 	return db
 }
 
-func TestAnexoRepo_FindByNome(t *testing.T) {
+func TestStorageObjectRepo_CreateWith_SuccessAndChildCreated(t *testing.T) {
 	db := withTestDB(t)
-	r := NewAnexoRepo(db)
+	r := NewStorageObjectRepo(db)
 	ctx := context.Background()
 
-	a := &domain.Anexo{Nome: "n1", TipoMime: "image/png", MD5: "m", Tamanho: 1, Armazenamento: "loc", Caminho: "p", Presente: true}
-	if err := r.Create(ctx, a); err != nil {
-		t.Fatalf("create failed: %v", err)
-	}
-
-	res, err := r.FindByNome(ctx, "n1")
-	if err != nil {
-		t.Fatalf("FindByNome failed: %v", err)
-	}
-	if len(res) != 1 {
-		t.Fatalf("expected 1 result, got %d", len(res))
-	}
-}
-
-func TestAnexoRepo_CreateWith_SuccessAndChildCreated(t *testing.T) {
-	db := withTestDB(t)
-	r := NewAnexoRepo(db)
-	ctx := context.Background()
-
-	a := &domain.Anexo{Nome: "a1", TipoMime: "t", MD5: "m", Tamanho: 1, Armazenamento: "loc", Caminho: "p", Presente: true}
+	a := &domain.StorageObject{Path: "a1", MimeType: "t", Name: "m"}
 	if err := r.CreateWith(ctx, a, func(tx *gorm.DB, anexoID int64) error {
 		return tx.Create(&imagemModel{ID: anexoID}).Error
 	}); err != nil {
@@ -72,12 +53,12 @@ func TestAnexoRepo_CreateWith_SuccessAndChildCreated(t *testing.T) {
 	}
 }
 
-func TestAnexoRepo_CreateWith_CallbackErrorCausesRollback(t *testing.T) {
+func TestStorageObjectRepo_CreateWith_CallbackErrorCausesRollback(t *testing.T) {
 	db := withTestDB(t)
-	r := NewAnexoRepo(db)
+	r := NewStorageObjectRepo(db)
 	ctx := context.Background()
 
-	a := &domain.Anexo{Nome: "a2", TipoMime: "t", MD5: "m", Tamanho: 1, Armazenamento: "loc", Caminho: "p", Presente: true}
+	a := &domain.StorageObject{Path: "a2", MimeType: "t", Name: "m"}
 	// callback returns error -> whole transaction should rollback (no anexo created)
 	if err := r.CreateWith(ctx, a, func(tx *gorm.DB, anexoID int64) error {
 		return tx.Exec("INVALID SQL").Error // force an error
@@ -86,16 +67,16 @@ func TestAnexoRepo_CreateWith_CallbackErrorCausesRollback(t *testing.T) {
 	}
 
 	// ensure anexo not present
-	var got domain.Anexo
-	if err := db.First(&got, "nome = ?", "a2").Error; err == nil {
+	var got domain.StorageObject
+	if err := db.First(&got, "name = ?", "a2").Error; err == nil {
 		t.Fatalf("expected no anexo due to rollback, found one")
 	}
 }
 
-func TestAnexoRepo_GetWith_ReturnsAnexoAndChildExists(t *testing.T) {
+func TestStorageObjectRepo_GetWith_ReturnsStorageObjectAndChildExists(t *testing.T) {
 	db := withTestDB(t)
 	// create parent + child directly via db to simulate existing rows
-	an := &domain.Anexo{BaseModel: domain.BaseModel{ID: 1}, Nome: "withchild", TipoMime: "t", MD5: "m", Tamanho: 1, Armazenamento: "loc", Caminho: "p", Presente: true}
+	an := &domain.StorageObject{BaseModel: domain.BaseModel{ID: 1}, Path: "withchild", MimeType: "t", Name: "loc"}
 	if err := db.Create(an).Error; err != nil {
 		t.Fatalf("create anexo: %v", err)
 	}
@@ -103,7 +84,7 @@ func TestAnexoRepo_GetWith_ReturnsAnexoAndChildExists(t *testing.T) {
 		t.Fatalf("create child: %v", err)
 	}
 
-	r := NewAnexoRepo(db)
+	r := NewStorageObjectRepo(db)
 	got, err := r.GetWith(context.Background(), an.ID)
 	if err != nil {
 		t.Fatalf("GetWith failed: %v", err)
@@ -112,8 +93,8 @@ func TestAnexoRepo_GetWith_ReturnsAnexoAndChildExists(t *testing.T) {
 	if got == nil {
 		t.Fatalf("expected non-nil result")
 	}
-	if got.Nome != "withchild" {
-		t.Fatalf("expected Nome=withchild got=%s", got.Nome)
+	if got.Path != "withchild" {
+		t.Fatalf("expected Path=withchild got=%s", got.Path)
 	}
 	// ensure child exists in imagem table
 	var img imagemModel
@@ -122,24 +103,24 @@ func TestAnexoRepo_GetWith_ReturnsAnexoAndChildExists(t *testing.T) {
 	}
 }
 
-func TestAnexoRepo_CreateWith_NoChildCallbackCreatesAnexo(t *testing.T) {
+func TestStorageObjectRepo_CreateWith_NoChildCallbackCreatesStorageObject(t *testing.T) {
 	db := withTestDB(t)
-	r := NewAnexoRepo(db)
+	r := NewStorageObjectRepo(db)
 	ctx := context.Background()
 
-	a := &domain.Anexo{Nome: "nochild", TipoMime: "t", MD5: "m", Tamanho: 1, Armazenamento: "loc", Caminho: "p", Presente: true}
+	a := &domain.StorageObject{Path: "nochild", MimeType: "t", Name: "loc"}
 	if err := r.CreateWith(ctx, a, nil); err != nil {
 		t.Fatalf("CreateWith(nil) failed: %v", err)
 	}
 
 	// ensure anexo saved
-	var got domain.Anexo
-	if err := db.First(&got, "nome = ?", "nochild").Error; err != nil {
+	var got domain.StorageObject
+	if err := db.First(&got, "path = ?", "nochild").Error; err != nil {
 		t.Fatalf("expected anexo row created: %v", err)
 	}
 }
 
-func TestAnexoRepo_CreateWith_CreateFailsReturnsError(t *testing.T) {
+func TestStorageObjectRepo_CreateWith_CreateFailsReturnsError(t *testing.T) {
 	// open a DB but do NOT AutoMigrate the anexo table so Create fails (table not found)
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
@@ -149,9 +130,9 @@ func TestAnexoRepo_CreateWith_CreateFailsReturnsError(t *testing.T) {
 		t.Fatalf("enable fk: %v", err)
 	}
 
-	r := NewAnexoRepo(db)
+	r := NewStorageObjectRepo(db)
 	ctx := context.Background()
-	a := &domain.Anexo{Nome: "willfail", TipoMime: "t", MD5: "m", Tamanho: 1, Armazenamento: "loc", Caminho: "p", Presente: true}
+	a := &domain.StorageObject{Path: "willfail", MimeType: "t", Name: "loc"}
 
 	if err := r.CreateWith(ctx, a, nil); err == nil {
 		t.Fatalf("expected CreateWith to fail due to missing table, but it succeeded")

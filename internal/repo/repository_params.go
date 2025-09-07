@@ -17,7 +17,6 @@ const (
 var allowedColumns = map[string]bool{
 	"id":         true,
 	"name":       true,
-	"nome":       true,
 	"created_at": true,
 }
 

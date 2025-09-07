@@ -23,13 +23,12 @@ func NewRepository[T any](db *gorm.DB) Repository[T] {
 	return internal.NewRepository[T](db)
 }
 
-type AnexoRepo interface {
-	FindByNome(ctx context.Context, nome string) ([]domain.Anexo, error)
-	CreateWith(ctx context.Context, anexo *domain.Anexo, createChild func(tx *gorm.DB, anexoID int64) error) error
-	GetWith(ctx context.Context, id int64, preloads ...string) (*domain.Anexo, error)
+type StorageObjectRepo interface {
+	CreateWith(ctx context.Context, anexo *domain.StorageObject, createChild func(tx *gorm.DB, anexoID int64) error) error
+	GetWith(ctx context.Context, id int64, preloads ...string) (*domain.StorageObject, error)
 	DB() *gorm.DB
 }
 
-func NewAnexoRepo(db *gorm.DB) AnexoRepo {
-	return internal.NewAnexoRepo(db)
+func NewStorageObjectRepo(db *gorm.DB) StorageObjectRepo {
+	return internal.NewStorageObjectRepo(db)
 }

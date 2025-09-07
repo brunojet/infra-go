@@ -17,7 +17,7 @@ func withDB(t *testing.T) *gorm.DB {
 	if err := db.Exec("PRAGMA foreign_keys = ON").Error; err != nil {
 		t.Fatalf("failed to enable fk: %v", err)
 	}
-	if err := db.AutoMigrate(&domain.Anexo{}); err != nil {
+	if err := db.AutoMigrate(&domain.StorageObject{}); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
 	return db
@@ -25,15 +25,15 @@ func withDB(t *testing.T) *gorm.DB {
 
 func TestRepository_NewRepository(t *testing.T) {
 	db := withDB(t)
-	repo := pkgrepo.NewRepository[domain.Anexo](db)
+	repo := pkgrepo.NewRepository[domain.StorageObject](db)
 	if repo.DB() != db {
 		t.Errorf("expected db to be %v, got %v", db, repo.DB())
 	}
 }
 
-func TestRepository_NewAnexoRepo(t *testing.T) {
+func TestRepository_NewStorageObjectRepo(t *testing.T) {
 	db := withDB(t)
-	repo := pkgrepo.NewAnexoRepo(db)
+	repo := pkgrepo.NewStorageObjectRepo(db)
 	if repo.DB() != db {
 		t.Errorf("expected db to be %v, got %v", db, repo.DB())
 	}

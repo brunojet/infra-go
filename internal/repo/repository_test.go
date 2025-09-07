@@ -451,7 +451,7 @@ func (ImagemTest) TableName() string { return "imagem" }
 
 type VersaoAplicativoTest struct {
 	ID       int64 `gorm:"primaryKey;autoIncrement"`
-	IdImagem int64 `gorm:"column:id_imagem;index"`
+	IdImagem int64 `gorm:";index"`
 }
 
 func (VersaoAplicativoTest) TableName() string { return "versao_app" }

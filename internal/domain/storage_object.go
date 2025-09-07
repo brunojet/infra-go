@@ -17,10 +17,10 @@ const (
 
 type StorageObject struct {
 	BaseModel
-	Path     string        `gorm:"uniqueIndex;not null;type:char(40);column:path" json:"path"`
-	Name     string        `gorm:"not null;type:char(40);column:name" json:"name"`
-	MimeType string        `gorm:"not null;type:varchar(100);column:mime_type" json:"mime_type"`
-	Status   *ObjectStatus `gorm:"index;column:status;not null;default:0;constraint:check(status IN (0, 10, 20, 30))" json:"status"`
+	Path     string        `gorm:"uniqueIndex;not null;type:char(40)" json:"path"`
+	Name     string        `gorm:"not null;type:char(40)" json:"name"`
+	MimeType string        `gorm:"not null;type:varchar(100)" json:"mime_type"`
+	Status   *ObjectStatus `gorm:"index;not null;default:0;constraint:check(status IN (0, 10, 20, 30))" json:"status"`
 }
 
 func (StorageObject) TableName() string { return "storage_object" }

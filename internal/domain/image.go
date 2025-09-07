@@ -12,8 +12,8 @@ const (
 
 type Image struct {
 	BaseModel
-	StorageObjectId *int64    `gorm:"uniqueIndex;not null;column:id_obj_armazenamento" json:"storage_object_id"`
-	ImageType       ImageType `gorm:"index;not null;column:image_type;check:image_type IN (0, 10, 20)" json:"image_type"`
+	StorageObjectId *int64    `gorm:"uniqueIndex;not null" json:"storage_object_id"`
+	ImageType       ImageType `gorm:"index;not null;check:image_type IN (0, 10, 20)" json:"image_type"`
 
 	//Relationships
 	StorageObject StorageObject `gorm:"foreignKey:StorageObjectId;references:ID;constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
